@@ -1,2 +1,2 @@
-echo "20.15.0" > .nvmrc
+echo "v20.15.0" > .nvmrc
 
