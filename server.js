@@ -18,7 +18,7 @@ const readQuotes = () => {
         fs.createReadStream('quotes.csv')
           .pipe(csv())
           .on('data', (row) => {
-              quotes.push(row['Quote Text']);
+              quotes.push({ text: row['Quote Text'], url: row['Slug'] });
           })
           .on('end', () => {
               resolve(quotes);
@@ -35,7 +35,7 @@ app.get('/api/quote', async (req, res) => {
     try {
         const quotes = await readQuotes();
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        res.json({ quote: randomQuote });
+        res.json(randomQuote);
     } catch (err) {
         console.error(err);
         res.status(500).send('Error reading quotes.');
@@ -44,7 +44,7 @@ app.get('/api/quote', async (req, res) => {
 
 app.post('/generate-image', async (req, res) => {
     try {
-        const quote = req.body.quote || "Default quote text";
+        const { quote } = req.body;
         const imagePath = path.join(__dirname, 'public', 'quote.png');
 
         // Generate image

@@ -5,22 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <title>Quote Image Generator</title>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-top: 50px;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .quote-textarea {
+            resize: none;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #quoteImage {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            background-color: #fff;
+        }
+        .btn-custom {
+            background-color: #17a2b8;
+            color: #fff;
+        }
+        .btn-custom:hover {
+            background-color: #138496;
+        }
+        .quote-link {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container text-center mt-5">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Quote of the Day</h5>
-                <button id="getQuote" class="btn btn-primary">Get Quote</button>
-                <form id="quoteForm" style="display:none;">
-                    <textarea id="quoteText" class="form-control mb-3" rows="3" placeholder="Enter your quote here..."></textarea>
-                    <button id="generateImage" class="btn btn-primary" type="submit">Generate Image</button>
-                </form>
-                <div id="result" class="mt-3">
-                    <img id="quoteImage" src="" alt="Generated Quote" style="display: none; max-width: 100%; height: auto;">
-                    <br>
-                    <button id="shareQuote" class="btn btn-info" style="display: none;">Share Quote on Twitter</button>
-                    <p id="message"></p>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title text-center">Quote of the Day</h5>
+                        <div class="text-center mb-3">
+                            <button id="getQuote" class="btn btn-primary">Get Quote</button>
+                        </div>
+                        <form id="quoteForm" style="display:none;">
+                            <div class="form-group">
+                                <textarea id="quoteText" class="form-control quote-textarea" rows="3" placeholder="Enter your quote here..."></textarea>
+                                <input type="hidden" id="quoteUrl">
+                            </div>
+                            <div class="text-center">
+                                <button id="generateImage" class="btn btn-primary">Generate Image</button>
+                            </div>
+                        </form>
+                        <div id="result" class="text-center mt-4">
+                            <img id="quoteImage" src="" alt="Generated Quote" style="display: none; max-width: 100%; height: auto;">
+                            <br>
+                            <button id="shareQuote" class="btn btn-custom mt-3" style="display: none;">Share Quote on Twitter</button>
+                            <p id="message" class="mt-3 text-danger"></p>
+                            <a id="quoteLink" href="" target="_blank" class="quote-link" style="display: none;">Read Original Text</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -34,8 +80,10 @@
                     url: '/api/quote',
                     type: 'GET',
                     success: function(response) {
-                        $('#quoteText').val(response.quote);
+                        $('#quoteText').val(response.text);
+                        $('#quoteUrl').val(response.url);
                         $('#quoteForm').show();
+                        $('#quoteLink').attr('href', response.url).show();
                     },
                     error: function() {
                         $('#message').text('Error fetching the quote.');
@@ -46,6 +94,7 @@
             $('#quoteForm').submit(function(e) {
                 e.preventDefault();
                 const quote = $('#quoteText').val();
+                const url = $('#quoteUrl').val();
                 $.ajax({
                     url: '/generate-image',
                     type: 'POST',
@@ -66,8 +115,9 @@
 
             $('#shareQuote').click(function() {
                 const quote = $('#quoteText').val();
+                const url = $('#quoteUrl').val();
                 const imageUrl = window.location.origin + $('#quoteImage').attr('src');
-                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(quote)}&url=${encodeURIComponent(imageUrl)}`;
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(quote)}&url=${encodeURIComponent(url)}&hashtags=quote`;
                 window.open(twitterUrl, '_blank');
             });
         });
